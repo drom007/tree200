@@ -7,7 +7,7 @@
 
 #include "FastLED.h"          // библиотека для работы с лентой
 
-#define LED_COUNT 170         // 170 - max number of leds for Arduino Nano v3
+#define LED_COUNT 200         // 170 - max number of leds for Arduino Nano v3
 #define LED_DT 13             // pin for пин, куда подключен DIN ленты
 #define SWITCH_DT  2           // pin for night mode switcher (brightness)
 #define MAX_BRIGHTNESS 200     // maximal brightness
@@ -35,7 +35,7 @@ int BOTTOM_INDEX = 0;        // светодиод начала отсчёта
 int TOP_INDEX = int(LED_COUNT / 2);
 int EVENODD = LED_COUNT % 2;
 struct CRGB leds[LED_COUNT];
-int ledsX[LED_COUNT][3];     //-ARRAY FOR COPYING WHATS IN THE LED STRIP CURRENTLY (FOR CELL-AUTOMATA, MARCH, ETC)
+byte ledsX[LED_COUNT][3];     //-ARRAY FOR COPYING WHATS IN THE LED STRIP CURRENTLY (FOR CELL-AUTOMATA, MARCH, ETC)
 
 int thisdelay = 50;          //-FX LOOPS DELAY VAR
 int thisstep = 10;           //-FX LOOPS DELAY VAR
