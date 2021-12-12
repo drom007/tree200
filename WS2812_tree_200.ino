@@ -8,11 +8,13 @@
 #include "FastLED.h"          // библиотека для работы с лентой
 
 #define LED_COUNT 170         // 170 - max number of leds for Arduino Nano v3
-#define LED_DT 13             // пин, куда подключен DIN ленты
+#define LED_DT 13             // pin for пин, куда подключен DIN ленты
+#define SWITCH_DT  2           // pin for night mode switcher (brightness)
+#define MAX_BRIGHTNESS 200     // maximal brightness
+#define NIGHT_BRIGHTNESS 10
 
-int max_bright = 200;
-// максимальная яркость (0 - 255)
-int ledMode = 1;
+byte brightness = 200;         // максимальная яркость (0 - 255)
+byte ledMode = 1;
 /*
   Стартовый режим
   0 - все выключены
@@ -54,6 +56,7 @@ float tcount = 0.0;          //-INC VAR FOR SIN LOOPS
 int lcount = 0;              //-ANOTHER COUNTING VAR
 
 unsigned long timing = 0;
+byte buttonState = 0;
 
 // ---------------СЛУЖЕБНЫЕ ПЕРЕМЕННЫЕ-----------------
 
@@ -69,59 +72,53 @@ void one_color_allHSV(int ahue) {    //-SET ALL LEDS TO ONE COLOR (HSV)
   }
 }
 
-void print_mode(int ledMode) {
+void print_mode() {
   Serial.print("Mode: ");
   Serial.println(ledMode);
   Serial.print("Delay: ");
   Serial.println(thisdelay);
+  Serial.print("Brightness: ");
+  Serial.println(brightness);
 }
 
 void setup()
 {
+  pinMode(SWITCH_DT, INPUT_PULLUP);
   Serial.begin(9600);              // открыть порт для связи
-  LEDS.setBrightness(max_bright);  // ограничить максимальную яркость
+  LEDS.setBrightness(brightness);  // ограничить максимальную яркость
 
   LEDS.addLeds<WS2811, LED_DT, GRB>(leds, LED_COUNT);  // настрйоки для нашей ленты (ленты на WS2811, WS2812, WS2812B)
   one_color_all(0, 0, 0);          // погасить все светодиоды
   LEDS.show();                     // отослать команду
 
   timing = millis();
-  print_mode(ledMode);
+  print_mode();
 }
 
-
-//void change_mode(int newmode) {
-//  thissat = 255;
-//  switch (newmode) {
-// 
-//  }
-//  bouncedirection = 0;
-//  one_color_all(0, 0, 0);
-//  ledMode = newmode;
-//}
-
-//void thebest() {
-//  int repeat = 1;
-//  int bestModes[] = {2, 3, 4};
-//  for (int i = 0 ; i < sizeof(bestModes) / sizeof(bestModes[0]); i++ ) {
-//    for (int r = 0; r < repeat; r++) {
-//      ledMode = bestModes[i];
-//    }
-//  }
-//}
-
 void loop() {
+  // byte buttonState = digitalRead(SWITCH_DT);
+    
+  if ( digitalRead(SWITCH_DT) != buttonState ) {
+    buttonState = digitalRead(SWITCH_DT);
+    if ( brightness == MAX_BRIGHTNESS ) {
+      brightness = NIGHT_BRIGHTNESS;
+    } else {
+      brightness = MAX_BRIGHTNESS;
+    }
+    Serial.print("Brightness: "); Serial.println(brightness);
+    LEDS.setBrightness(brightness);  // ограничить максимальную яркость
+  }
 
   if (millis() - timing > 1000 * 30 ) { 
     timing = millis();
     ledMode++;
-    print_mode(ledMode);
+    print_mode();
   }
   
   if (Serial.available() > 0) {     // если что то прислали
     ledMode = Serial.parseInt();    // парсим в тип данных int
     timing = millis();
-    print_mode(ledMode);
+    print_mode();
   }
   
   // change_mode(ledMode);
