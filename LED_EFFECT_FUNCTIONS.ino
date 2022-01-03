@@ -95,30 +95,89 @@ void color_bounceFADE() {                    //-m6-BOUNCE COLOR (SIMPLE MULTI-LE
   int iL1 = adjacent_cw(idex);
   int iL2 = adjacent_cw(iL1);
   int iL3 = adjacent_cw(iL2);
+  int iL4 = adjacent_cw(iL3);
+  int iL5 = adjacent_cw(iL4);
+  int iL6 = adjacent_cw(iL5);
+  int iL7 = adjacent_cw(iL6);
+  int iL8 = adjacent_cw(iL7);
+  int iL9 = adjacent_cw(iL8);
+  int iL10 = adjacent_cw(iL9);
+
   int iR1 = adjacent_ccw(idex);
   int iR2 = adjacent_ccw(iR1);
   int iR3 = adjacent_ccw(iR2);
+  int iR4 = adjacent_ccw(iR3);
+  int iR5 = adjacent_ccw(iR4);
+  int iR6 = adjacent_ccw(iR5);
+  int iR7 = adjacent_ccw(iR6);
+  int iR8 = adjacent_ccw(iR7);
+  int iR9 = adjacent_ccw(iR8);
+  int iR10 = adjacent_ccw(iR9);
+
   for (int i = 0; i < LED_COUNT; i++ ) {
     if (i == idex) {
       leds[i] = CHSV(thishue, thissat, 255);
     }
     else if (i == iL1) {
-      leds[i] = CHSV(thishue, thissat, 150);
+      leds[i] = CHSV(thishue, thissat, 230);
     }
     else if (i == iL2) {
-      leds[i] = CHSV(thishue, thissat, 80);
+      leds[i] = CHSV(thishue, thissat, 205);
     }
     else if (i == iL3) {
-      leds[i] = CHSV(thishue, thissat, 20);
+      leds[i] = CHSV(thishue, thissat, 180);
     }
-    else if (i == iR1) {
-      leds[i] = CHSV(thishue, thissat, 150);
+    else if (i == iL4) {
+      leds[i] = CHSV(thishue, thissat, 155);
     }
-    else if (i == iR2) {
+    else if (i == iL5) {
+      leds[i] = CHSV(thishue, thissat, 130);
+    }
+    else if (i == iL6) {
+      leds[i] = CHSV(thishue, thissat, 105);
+    }
+    else if (i == iL7) {
       leds[i] = CHSV(thishue, thissat, 80);
     }
+    else if (i == iL8) {
+      leds[i] = CHSV(thishue, thissat, 55);
+    }
+    else if (i == iL9) {
+      leds[i] = CHSV(thishue, thissat, 30);
+    }
+    else if (i == iL10) {
+      leds[i] = CHSV(thishue, thissat, 15);
+    }
+
+    else if (i == iR1) {
+      leds[i] = CHSV(thishue, thissat, 230);
+    }
+    else if (i == iR2) {
+      leds[i] = CHSV(thishue, thissat, 205);
+    }
     else if (i == iR3) {
-      leds[i] = CHSV(thishue, thissat, 20);
+      leds[i] = CHSV(thishue, thissat, 180);
+    }
+    else if (i == iR4) {
+      leds[i] = CHSV(thishue, thissat, 155);
+    }
+    else if (i == iR5) {
+      leds[i] = CHSV(thishue, thissat, 130);
+    }
+    else if (i == iR6) {
+      leds[i] = CHSV(thishue, thissat, 105);
+    }
+    else if (i == iR7) {
+      leds[i] = CHSV(thishue, thissat, 80);
+    }
+    else if (i == iR8) {
+      leds[i] = CHSV(thishue, thissat, 55);
+    }
+    else if (i == iR9) {
+      leds[i] = CHSV(thishue, thissat, 30);
+    }
+    else if (i == iR10) {
+      leds[i] = CHSV(thishue, thissat, 15);
     }
     else {
       leds[i] = CHSV(0, 0, 0);
@@ -1076,6 +1135,34 @@ void Sparkle(byte red, byte green, byte blue, int SpeedDelay) {
   setPixel(Pixel, 0, 0, 0);
 }
 
+//------------------------------- Pyramid1 -------------------------------------
+void Pyramid1(int SpeedDelay, byte red, byte green, byte blue) {
+  #define DELAY 1*100
+
+  setAll(0,0,0);
+  
+  for (byte l = 0; l < PYRAMID_LEVELS_COUNT; l++) {
+    for (int Pixel = PYRAMID_LEVELS[l][0]; Pixel < PYRAMID_LEVELS[l][1]; Pixel++) {
+        setPixel(Pixel, red, green, blue);
+    }
+    FastLED.show();
+    delay(DELAY);
+    // setAll(0,0,0);
+  }
+
+  delay(5*DELAY);
+  for (byte l = PYRAMID_LEVELS_COUNT; l > 0; l--) {
+    for (int Pixel = PYRAMID_LEVELS[l][0]; Pixel < PYRAMID_LEVELS[l][1]; Pixel++) {
+        setPixel(Pixel, 0, 0, 0);
+    }
+    FastLED.show();
+    delay(DELAY);
+  }
+  setAll(0,0,0);
+  delay(5*DELAY);
+
+}
+
 //-------------------------------SnowSparkle---------------------------------------
 void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDelay) {
   setAll(red, green, blue);
@@ -1137,6 +1224,8 @@ void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, in
 
   delay(EndPause);
 }
+
+
 
 //-------------------------------BouncingBalls---------------------------------------
 void BouncingBalls(byte red, byte green, byte blue, int BallCount) {

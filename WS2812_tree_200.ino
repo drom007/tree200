@@ -12,9 +12,11 @@
 #define SWITCH_DT  2           // pin for night mode switcher (brightness)
 #define MAX_BRIGHTNESS 200     // maximal brightness
 #define NIGHT_BRIGHTNESS 10
+#define SECONDS_PER_MODE 30
 
-byte brightness = 200;         // максимальная яркость (0 - 255)
-byte ledMode = 1;
+byte brightness = 200;          // максимальная яркость (0 - 255)
+byte ledMode = 1;               // first mode
+boolean night = false;          // not all animations during the night
 /*
   Стартовый режим
   0 - все выключены
@@ -55,6 +57,18 @@ int bouncedirection = 0;     //-SWITCH FOR COLOR BOUNCE (0-1)
 float tcount = 0.0;          //-INC VAR FOR SIN LOOPS
 int lcount = 0;              //-ANOTHER COUNTING VAR
 
+
+const byte PYRAMID_LEVELS_COUNT = 7;
+const byte PYRAMID_LEVELS[PYRAMID_LEVELS_COUNT][2] = {
+    {0,54},       // 54
+    {55,97},      // 42
+    {98,129},     // 31
+    {130,153},    // 23
+    {154,170},    // 16
+    {171,187},    // 16
+    {188,200}     // 12
+};
+
 unsigned long timing = 0;
 byte buttonState = 0;
 
@@ -87,7 +101,7 @@ void setup()
   Serial.begin(9600);              // открыть порт для связи
   LEDS.setBrightness(brightness);  // ограничить максимальную яркость
 
-  LEDS.addLeds<WS2811, LED_DT, GRB>(leds, LED_COUNT);  // настрйоки для нашей ленты (ленты на WS2811, WS2812, WS2812B)
+  LEDS.addLeds<WS2811, LED_DT, RGB>(leds, LED_COUNT);  // настрйоки для нашей ленты (ленты на WS2811, WS2812, WS2812B)
   one_color_all(0, 0, 0);          // погасить все светодиоды
   LEDS.show();                     // отослать команду
 
@@ -96,20 +110,19 @@ void setup()
 }
 
 void loop() {
-  // byte buttonState = digitalRead(SWITCH_DT);
-    
   if ( digitalRead(SWITCH_DT) != buttonState ) {
     buttonState = digitalRead(SWITCH_DT);
     if ( brightness == MAX_BRIGHTNESS ) {
+      night = true; 
       brightness = NIGHT_BRIGHTNESS;
     } else {
+      night = false;
       brightness = MAX_BRIGHTNESS;
     }
-    Serial.print("Brightness: "); Serial.println(brightness);
     LEDS.setBrightness(brightness);  // ограничить максимальную яркость
   }
 
-  if (millis() - timing > 1000 * 30 ) { 
+  if (millis() - timing > 1000 * SECONDS_PER_MODE ) { 
     timing = millis();
     ledMode++;
     print_mode();
@@ -129,7 +142,7 @@ void loop() {
     case  2: thisdelay = 30; thisstep = 3; rainbow_loop(); break;            // крутящаяся радуга
     case  3: thisdelay = 200; random_burst(); break;            // случайная смена цветов
     case  4: thisdelay = 30; color_bounce(); break;            // бегающий светодиод
-    case  5: thisdelay = 70; color_bounceFADE(); break;        // бегающий паровозик светодиодов
+    case  5: thisdelay = 50; color_bounceFADE(); break;        // бегающий паровозик светодиодов
     case  6: thisdelay = 50; ems_lightsONE(); break;           // вращаются красный и синий
     case  7: thisdelay = 30; ems_lightsALL(); break;           // вращается половина красных и половина синих
     case  8: ledMode++ ; break; // thisdelay = 50; russian_flag(); break;
@@ -142,22 +155,21 @@ void loop() {
     case 16: ledMode++ ; break; //thisdelay = 100; thishue = 10; kitt(); break;                    // случайные вспышки красного в вертикаьной плоскости
     case 17: thisdelay = 50; thishue = 95; matrix(); break;                  // зелёненькие бегают по кругу случайно
     case 18: thisdelay = 5; new_rainbow_loop(); break;        // крутая плавная вращающаяся радуга
-    case 19: thisdelay = 50; strip_march_ccw(); break;         // чёт сломалось
-    case 20: thisdelay = 50; strip_march_cw(); break;          // чёт сломалось
-    case 21: colorWipe(0x00, 0xff, 0x00, thisdelay);
-             colorWipe(0x00, 0x00, 0x00, thisdelay); break;   // плавное заполнение цветом
-    case 22: thisdelay = 100; CylonBounce(0xff, 0, 0, 4, 10, thisdelay); break;                      // бегающие светодиоды
-    case 23: ledMode++ ; break; // thisdelay = 15; Fire(55, 120, thisdelay); break;                                       // линейный огонь
-    case 24: thisdelay = 100; NewKITT(0xff, 0, 0, 8, 10, thisdelay); break;                          // беготня секторов круга (не работает)
-    case 25: thisdelay = 20; rainbowCycle(thisdelay); break;                                        // очень плавная вращающаяся радуга
-    case 26: thisdelay = 30; TwinkleRandom(20, thisdelay, 1); break;                                // случайные разноцветные включения (1 - танцуют все, 0 - случайный 1 диод)
-    case 27: thisdelay = 80; RunningLights(0xff, 0xff, 0x00, thisdelay); break;                     // бегущие огни
-    case 28: thisdelay = 10; Sparkle(0xff, 0xaa, 0xff, thisdelay); break;                           // случайные вспышки белого цвета
-    case 29: thisdelay = 20; SnowSparkle(0x10, 0x10, 0x10, thisdelay, random(100, 1000)); break;    // случайные вспышки белого цвета на белом фоне
-    case 30: thisdelay = 150; theaterChase(0xff, 0, 0, thisdelay); break;                            // бегущие каждые 3 (ЧИСЛО СВЕТОДИОДОВ ДОЛЖНО БЫТЬ НЕЧЁТНОЕ)
-    case 31: thisdelay = 200; theaterChaseRainbow(thisdelay); break;                                 // бегущие каждые 3 радуга (ЧИСЛО СВЕТОДИОДОВ ДОЛЖНО БЫТЬ КРАТНО 3)
-    case 32: ledMode++ ; break; // thisdelay = 10; BouncingBalls(0xff, 0, 0, 3); break;                                   // прыгающие мячики
-    case 33: ledMode++ ; break; // thisdelay = 200; BouncingColoredBalls(3, ballColors); break;                            // прыгающие мячики цветные
+    case 19: thisdelay = 50; strip_march_ccw(); break;         // против часовой стрелки
+    case 20: thisdelay = 50; strip_march_cw(); break;          // по часовой стрелке
+    case 21: colorWipe(0x00, 0xff, 0x00, thisdelay); break;   // плавное заполнение цветом
+    case 22: colorWipe(0x00, 0x00, 0x00, thisdelay); break;   // плавное заполнение цветом
+    case 23: thisdelay = 100; CylonBounce(0xff, 0, 0, 4, 10, thisdelay); break;                     // бегающие светодиоды
+    case 24: ledMode++ ; break; // thisdelay = 15; Fire(55, 120, thisdelay); break;                 // линейный огонь
+    case 25: thisdelay = 100; NewKITT(0xff, 0, 0, 8, 10, thisdelay); break;                         // беготня секторов круга (не работает)
+    case 26: thisdelay = 20; rainbowCycle(thisdelay); break;                                        // очень плавная вращающаяся радуга
+    case 27: thisdelay = 30; TwinkleRandom(20, thisdelay, 1); break;                                // случайные разноцветные включения (1 - танцуют все, 0 - случайный 1 диод)
+    case 28: thisdelay = 80; RunningLights(0xff, 0xff, 0x00, thisdelay); break;                     // бегущие огни
+    case 29: thisdelay = 30; Sparkle(0xff, 0xaa, 0xff, thisdelay); break;                           // случайные вспышки белого цвета
+    case 30: thisdelay = 20; SnowSparkle(0x10, 0x10, 0x10, thisdelay, random(100, 500)); break;     // случайные вспышки белого цвета на белом фоне
+    case 31: thisdelay = 150; theaterChase(0xff, 0, 0, thisdelay); break;                           // бегущие каждые 3 (ЧИСЛО СВЕТОДИОДОВ ДОЛЖНО БЫТЬ НЕЧЁТНОЕ)
+    case 32: thisdelay = 200; theaterChaseRainbow(thisdelay); break;                                // бегущие каждые 3 радуга (ЧИСЛО СВЕТОДИОДОВ ДОЛЖНО БЫТЬ КРАТНО 3)
+    case 33: thisdelay = 100; Pyramid1(thisdelay, 255, 0, 0); break;
     case 34: ledMode = 1; break;
   }
 
