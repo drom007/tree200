@@ -1167,7 +1167,37 @@ void Pyramid1(int SpeedDelay, byte red, byte green, byte blue) {
   delay(5*SpeedDelay);
 }
 //------------------------------- Pyramid2 -------------------------------------
-void Pyramid2(int SpeedDelay, byte red, byte green, byte blue) {
+void Pyramid2(int SpeedDelay, byte red, byte green, byte blue) {      // line by line from the top to the bottom
+  #define STEPS 10
+
+  // fade in 1 line
+  for (byte l = 0; l <= PYRAMID_LEVELS_COUNT; l++) {
+    for (byte step = 1; step <= STEPS; step++) {
+      for (int Pixel = PYRAMID_LEVELS[PYRAMID_LEVELS_COUNT-l][0]; Pixel < PYRAMID_LEVELS[PYRAMID_LEVELS_COUNT-l][1]; Pixel++) {
+        setPixel(Pixel, (red/STEPS)*(step),(green/STEPS)*(step), (blue/STEPS)*(step));
+      }
+      FastLED.show();
+      delay(SpeedDelay);
+    }
+    delay(SpeedDelay);    // between lines
+  }
+  
+  // fade out 1 line
+  for (byte l = 0; l <= PYRAMID_LEVELS_COUNT; l++) {
+    for (byte step = 1; step <= STEPS; step++) {
+      for (int Pixel = PYRAMID_LEVELS[PYRAMID_LEVELS_COUNT-l][0]; Pixel < PYRAMID_LEVELS[PYRAMID_LEVELS_COUNT-l][1]; Pixel++) {
+        setPixel(Pixel, red - (red/STEPS)*(step), green - (green/STEPS)*(step), blue - (blue/STEPS)*(step));
+      }
+      FastLED.show();
+      delay(SpeedDelay);
+    }
+    delay(SpeedDelay);    // between lines
+  }
+  delay(5 * SpeedDelay);
+}
+
+//------------------------------- Pyramid3 -------------------------------------
+void Pyramid3(int SpeedDelay, byte red, byte green, byte blue) {
   #define STEPS 10
 
   // fade in 1 line
@@ -1179,10 +1209,10 @@ void Pyramid2(int SpeedDelay, byte red, byte green, byte blue) {
       FastLED.show();
       delay(SpeedDelay);
     }
-    delay(2 * SpeedDelay);  // between lines
+    delay(SpeedDelay);  // between lines
   }
   
-  delay(2 * SpeedDelay);    // between fade in/out
+//  delay(2 * SpeedDelay);    // between fade in/out
 
   // fade out 1 line
   for (byte l = 0; l <= PYRAMID_LEVELS_COUNT; l++) {
@@ -1193,11 +1223,10 @@ void Pyramid2(int SpeedDelay, byte red, byte green, byte blue) {
       FastLED.show();
       delay(SpeedDelay);
     }
-    delay(2 * SpeedDelay);    // between lines
+    delay(SpeedDelay);    // between lines
   }
-  delay(5 * SpeedDelay);
+  delay(3 * SpeedDelay);
 }
-
 //-------------------------------SnowSparkle---------------------------------------
 void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDelay) {
   setAll(red, green, blue);
