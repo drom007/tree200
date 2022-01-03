@@ -15,7 +15,7 @@
 #define SECONDS_PER_MODE 30
 
 byte brightness = 200;          // максимальная яркость (0 - 255)
-byte ledMode = 1;               // first mode
+byte ledMode = 34;               // first mode
 boolean night = false;          // not all animations during the night
 /*
   Стартовый режим
@@ -170,7 +170,8 @@ void loop() {
     case 31: thisdelay = 150; theaterChase(0xff, 0, 0, thisdelay); break;                           // бегущие каждые 3 (ЧИСЛО СВЕТОДИОДОВ ДОЛЖНО БЫТЬ НЕЧЁТНОЕ)
     case 32: thisdelay = 200; theaterChaseRainbow(thisdelay); break;                                // бегущие каждые 3 радуга (ЧИСЛО СВЕТОДИОДОВ ДОЛЖНО БЫТЬ КРАТНО 3)
     case 33: thisdelay = 100; Pyramid1(thisdelay, 255, 0, 0); break;
-    case 34: ledMode = 1; break;
+    case 34: thisdelay = 30; Pyramid2(thisdelay, 0, 250, 0); break;
+    case 35: ledMode = 1; break;
   }
 
 }

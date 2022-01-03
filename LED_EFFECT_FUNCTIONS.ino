@@ -12,6 +12,15 @@ void rainbow_fade() {                         //-m2-FADE ALL LEDS THROUGH HSV RA
   delay(thisdelay);
 }
 
+void fade_out(byte time) {                         //-m2-FADE OUT within time ms
+  
+  for (int idex = 0 ; idex < LED_COUNT; idex++ ) {
+    leds[idex] = CHSV(thishue, thissat, 255);
+  }
+  LEDS.show();
+  delay(thisdelay);
+}
+
 void rainbow_loop() {                        //-m3-LOOP HSV RAINBOW
   idex++;
   ihue = ihue + thisstep;
@@ -1137,30 +1146,56 @@ void Sparkle(byte red, byte green, byte blue, int SpeedDelay) {
 
 //------------------------------- Pyramid1 -------------------------------------
 void Pyramid1(int SpeedDelay, byte red, byte green, byte blue) {
-  #define DELAY 1*100
-
-  setAll(0,0,0);
-  
   for (byte l = 0; l < PYRAMID_LEVELS_COUNT; l++) {
     for (int Pixel = PYRAMID_LEVELS[l][0]; Pixel < PYRAMID_LEVELS[l][1]; Pixel++) {
         setPixel(Pixel, red, green, blue);
     }
     FastLED.show();
-    delay(DELAY);
+    delay(SpeedDelay);
     // setAll(0,0,0);
   }
 
-  delay(5*DELAY);
+  delay(5*SpeedDelay);
   for (byte l = PYRAMID_LEVELS_COUNT; l > 0; l--) {
     for (int Pixel = PYRAMID_LEVELS[l][0]; Pixel < PYRAMID_LEVELS[l][1]; Pixel++) {
         setPixel(Pixel, 0, 0, 0);
     }
     FastLED.show();
-    delay(DELAY);
+    delay(SpeedDelay);
   }
   setAll(0,0,0);
-  delay(5*DELAY);
+  delay(5*SpeedDelay);
+}
+//------------------------------- Pyramid2 -------------------------------------
+void Pyramid2(int SpeedDelay, byte red, byte green, byte blue) {
+  #define STEPS 10
 
+  // fade in 1 line
+  for (byte l = 0; l < PYRAMID_LEVELS_COUNT; l++) {
+    for (byte step = 0; step < STEPS; step++) {
+      for (int Pixel = PYRAMID_LEVELS[l][0]; Pixel < PYRAMID_LEVELS[l][1]; Pixel++) {
+        setPixel(Pixel, (red/STEPS)*(step), (green/STEPS)*(step), (blue/STEPS)*(step));
+      }
+      FastLED.show();
+      delay(SpeedDelay);
+    }
+    delay(2 * SpeedDelay);  // between lines
+  }
+  
+  delay(2 * SpeedDelay);    // between fade in/out
+
+  // fade out 1 line
+  for (byte l = 0; l <= PYRAMID_LEVELS_COUNT; l++) {
+    for (byte step = 1; step <= STEPS; step++) {
+      for (int Pixel = PYRAMID_LEVELS[PYRAMID_LEVELS_COUNT-l][0]; Pixel < PYRAMID_LEVELS[PYRAMID_LEVELS_COUNT-l][1]; Pixel++) {
+        setPixel(Pixel, red - (red/STEPS)*(step), green - (green/STEPS)*(step), blue - (blue/STEPS)*(step));
+      }
+      FastLED.show();
+      delay(SpeedDelay);
+    }
+    delay(2 * SpeedDelay);    // between lines
+  }
+  delay(5 * SpeedDelay);
 }
 
 //-------------------------------SnowSparkle---------------------------------------
